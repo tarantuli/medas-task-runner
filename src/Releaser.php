@@ -20,13 +20,16 @@ readonly class Releaser
     private StorageController $controller;
 
     public function __construct(
+        #[ConfigValue(ConfigOptions\TaskClass::class)]
+        private string  $taskClass,
+
         #[ConfigValue(ConfigOptions\MaximumLockDuration::class)]
         private int     $maximumLockDuration,
         StorageManager  $storageManager,
         StoreController $storeController,
     )
     {
-        $this->store = $storeController->storeForEntity(Task::class);
+        $this->store = $storeController->storeForEntity($this->taskClass);
         $this->controller = $storageManager->controller($this->store->storage());
     }
 

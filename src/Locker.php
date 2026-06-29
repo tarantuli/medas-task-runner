@@ -25,13 +25,16 @@ readonly class Locker
         private CodeGenerator $codeGenerator,
         private Repository    $repository,
 
+        #[ConfigValue(ConfigOptions\TaskClass::class)]
+        private string        $taskClass,
+
         #[ConfigValue(ConfigOptions\MarkerLength::class)]
         private int           $markerLength,
         StorageManager        $storageManager,
         StoreController       $storeController,
     )
     {
-        $this->store = $storeController->storeForEntity(Task::class);
+        $this->store = $storeController->storeForEntity($this->taskClass);
         $this->controller = $storageManager->controller($this->store->storage());
     }
 
@@ -40,7 +43,7 @@ readonly class Locker
         $marker = $this->attemptToLock();
 
         /** @var Task|null $task */
-        $task = $this->repository->fetchOne(WithValues::create(Task::class, ['lockMarker' => $marker]));
+        $task = $this->repository->fetchOne(WithValues::create($this->taskClass, ['lockMarker' => $marker]));
 
         return $task;
     }
