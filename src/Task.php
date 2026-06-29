@@ -31,7 +31,7 @@ interface Task extends HasId
     public \DateTime|null $scheduledAt { get; }
 
     /**
-     * Should default to null
+     * Should default to null. Its length must be equal to the value of the marker-length config option.
      */
     public string|null $lockMarker { get; }
 
