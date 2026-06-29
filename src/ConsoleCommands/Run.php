@@ -28,6 +28,11 @@ readonly class Run extends BaseConsoleCommand
         return 'run';
     }
 
+    public function aliases(): array
+    {
+        return ['run-tasks'];
+    }
+
     public function description(): string
     {
         return 'Runs the task runner for the specified time';
