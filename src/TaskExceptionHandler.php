@@ -10,5 +10,5 @@ namespace Medas\TaskRunner;
  */
 interface TaskExceptionHandler
 {
-    public function handle(\Throwable $e): void;
+    public function handle(Task $task, \Throwable $e): void;
 }

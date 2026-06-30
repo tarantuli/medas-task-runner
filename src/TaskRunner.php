@@ -56,7 +56,7 @@ readonly class TaskRunner
                     }
 
                     if ($this->exceptionHandler !== null) {
-                        $this->exceptionHandler->handle($e);
+                        $this->exceptionHandler->handle($task, $e);
                     }
                     else {
                         throw $e;
