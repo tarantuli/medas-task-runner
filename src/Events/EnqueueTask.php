@@ -11,6 +11,8 @@ readonly class EnqueueTask
         public string         $methodName,
         public array          $arguments = [],
         public \DateTime|null $scheduledAt = null,
+        public int|null       $retryAfter = null,
+        public int|null       $maxAttempts = null,
     )
     {
     }

@@ -34,6 +34,8 @@ readonly class EnqueueTaskHandler
             'arguments' => $this->jsonEncoder->encode($event->arguments),
             'status' => TaskStatus::Pending,
             'scheduledAt' => $event->scheduledAt,
+            'retryAfter' => $event->retryAfter,
+            'maxAttempts' => $event->maxAttempts,
         ]);
 
         $this->entityManager->persist($task);

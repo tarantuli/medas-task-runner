@@ -31,6 +31,21 @@ interface Task extends HasId
     public \DateTime|null $scheduledAt { get; }
 
     /**
+     * If not null, if executiom fails, the task should be retried after the given number of seconds.
+     */
+    public int|null $retryAfter { get; }
+
+    /**
+     * The maximum number of times the task may be attempted to retry. Null means no limit.
+     */
+    public int|null $maxAttempts { get; }
+
+    /**
+     * The number of times the task has been attempted to run.
+     */
+    public int $attempts { get; }
+
+    /**
      * Should default to null. Its length must be equal to the value of the marker-length config option.
      */
     public string|null $lockMarker { get; }

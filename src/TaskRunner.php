@@ -48,7 +48,12 @@ readonly class TaskRunner
                     $this->releaser->release($task, TaskStatus::Complete);
                 }
                 catch (\Throwable $e) {
-                    $this->releaser->release($task, TaskStatus::Failed);
+                    if ($this->retryAllowed($task)) {
+                        $this->releaser->scheduleRetry($task, $task->retryAfter);
+                    }
+                    else {
+                        $this->releaser->release($task, TaskStatus::Failed);
+                    }
 
                     if ($this->exceptionHandler !== null) {
                         $this->exceptionHandler->handle($e);
@@ -80,5 +85,18 @@ readonly class TaskRunner
         }
 
         $executor->{$task->methodName}(...$arguments);
+    }
+
+    private function retryAllowed(Task $task): bool
+    {
+        if ($task->retryAfter === null) {
+            return false;
+        }
+
+        if ($task->maxAttempts !== null && $task->attempts >= $task->maxAttempts) {
+            return false;
+        }
+
+        return true;
     }
 }

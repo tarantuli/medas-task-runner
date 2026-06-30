@@ -23,6 +23,9 @@ class BasicTask implements Task
 
     public TaskStatus $status = TaskStatus::Pending;
     public \DateTime|null $scheduledAt = null;
+    public int|null $retryAfter = null;
+    public int|null $maxAttempts = null;
+    public int $attempts = 0;
 
     #[Text(length: 16)]
     public string|null $lockMarker = null;
