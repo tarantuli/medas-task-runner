@@ -9,6 +9,7 @@ use Medas\EntityManager\Filters\LessThanOrEqual;
 use Medas\EntityManager\Repository;
 use Medas\EntityManager\Selector\{Operants\Property, Selectors\WithValues, Slice, Sorting\SortBy};
 use Medas\StorageManager\{
+    Exceptions\NoDefaultStorageFound,
     Interfaces\StorageController,
     Interfaces\Store,
     StorageManager,
@@ -34,8 +35,13 @@ readonly class Locker
         StoreController       $storeController,
     )
     {
-        $this->store = $storeController->storeForEntity($this->taskClass);
-        $this->controller = $storageManager->controller($this->store->storage());
+        try {
+            $this->store = $storeController->storeForEntity($this->taskClass);
+            $this->controller = $storageManager->controller($this->store->storage());
+        }
+        catch (NoDefaultStorageFound) {
+            // Don't throw an exception here
+        }
     }
 
     public function lock(): Task|null

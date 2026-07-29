@@ -6,6 +6,7 @@ namespace Medas\TaskRunner;
 
 use Medas\Core\Attributes\{ConfigValue, Service};
 use Medas\EntityManager\Filters\LessThan;
+use Medas\StorageManager\Exceptions\NoDefaultStorageFound;
 use Medas\StorageManager\Interfaces\{ActionExecutor, Builders\UpdateBuilder, Store};
 use Medas\StorageManager\StorageManager;
 use Medas\StorageManager\StoreController;
@@ -27,10 +28,15 @@ readonly class Releaser
         StoreController $storeController,
     )
     {
-        $this->store = $storeController->storeForEntity($this->taskClass);
-        $controller = $storageManager->controller($this->store->storage());
-        $this->updateBuilder = $controller->actionBuilders()->update();
-        $this->actionExecutor = $controller->actionExecutor();
+        try {
+            $this->store = $storeController->storeForEntity($this->taskClass);
+            $controller = $storageManager->controller($this->store->storage());
+            $this->updateBuilder = $controller->actionBuilders()->update();
+            $this->actionExecutor = $controller->actionExecutor();
+        }
+        catch (NoDefaultStorageFound) {
+            // Don't throw an exception here
+        }
     }
 
     public function releaseExpiredLocks(): void
