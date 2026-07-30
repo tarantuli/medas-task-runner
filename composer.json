@@ -12,15 +12,15 @@
   ],
   "type": "library",
   "require": {
-    "morphp/medas-core": "^4",
     "morphp/medas-console": "^3|^4",
+    "morphp/medas-core": "^4",
     "morphp/medas-entity-manager": "^3",
     "morphp/medas-json": "^3",
+    "morphp/medas-object-instantiator": "^4",
     "morphp/medas-storage-manager": "^4",
     "php": "^8.4"
   },
   "require-dev": {
-    "morphp/medas-object-instantiator": "^4",
     "morphp/medas-service-manager": "^4",
     "phpunit/phpunit": "^10"
   },

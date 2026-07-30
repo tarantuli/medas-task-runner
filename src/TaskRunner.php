@@ -11,11 +11,13 @@ use Medas\Core\{
     Interfaces\ServiceManager
 };
 use Medas\Json\JsonEncoder;
+use Medas\ObjectInstantiator\ArgumentResolving\ArgumentResolver;
 
 #[Service, Entrypoint]
 readonly class TaskRunner
 {
     public function __construct(
+        private ArgumentResolver          $argumentResolver,
         private JsonEncoder               $jsonEncoder,
         private Locker                    $locker,
         private Releaser                  $releaser,
@@ -83,6 +85,9 @@ readonly class TaskRunner
         if (!is_array($arguments)) {
             throw new Exceptions\ArgumentsDoNotDecodeToArray($arguments);
         }
+
+        $method = new \ReflectionMethod($task->className, $task->methodName);
+        $arguments = $this->argumentResolver->resolveMethodParameters($method, $arguments);
 
         $executor->{$task->methodName}(...$arguments);
     }

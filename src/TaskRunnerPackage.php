@@ -8,6 +8,7 @@ use Medas\Console\ConsolePackage;
 use Medas\Core\{AsSingleton, BasePackage};
 use Medas\EntityManager\EntityManagerPackage;
 use Medas\Json\JsonPackage;
+use Medas\ObjectInstantiator\ObjectInstantiatorPackage;
 use Medas\StorageManager\StorageManagerPackage;
 
 class TaskRunnerPackage extends BasePackage
@@ -20,6 +21,7 @@ class TaskRunnerPackage extends BasePackage
             ConsolePackage::instance(),
             EntityManagerPackage::instance(),
             JsonPackage::instance(),
+            ObjectInstantiatorPackage::instance(),
             StorageManagerPackage::instance(),
         ];
     }
