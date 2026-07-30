@@ -8,18 +8,18 @@ use Medas\Core\{
     Attributes\ConfigValue,
     Attributes\Entrypoint,
     Attributes\Service,
+    Interfaces\ObjectInstantiator,
     Interfaces\ServiceManager
 };
 use Medas\Json\JsonEncoder;
-use Medas\ObjectInstantiator\ArgumentResolving\ArgumentResolver;
 
 #[Service, Entrypoint]
 readonly class TaskRunner
 {
     public function __construct(
-        private ArgumentResolver          $argumentResolver,
         private JsonEncoder               $jsonEncoder,
         private Locker                    $locker,
+        private ObjectInstantiator        $objectInstantiator,
         private Releaser                  $releaser,
         private ServiceManager            $serviceManager,
         private TaskExceptionHandler|null $exceptionHandler,
@@ -87,7 +87,7 @@ readonly class TaskRunner
         }
 
         $method = new \ReflectionMethod($task->className, $task->methodName);
-        $arguments = $this->argumentResolver->resolveMethodParameters($method, $arguments);
+        $arguments = $this->objectInstantiator->resolveMethodParameters($method, $arguments);
 
         $executor->{$task->methodName}(...$arguments);
     }
