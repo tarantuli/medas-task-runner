@@ -11,7 +11,11 @@ use Medas\Core\{
     Interfaces\EntityManager
 };
 use Medas\Json\JsonEncoder;
-use Medas\TaskRunner\{ConfigOptions\TaskClass, TaskStatus};
+use Medas\TaskRunner\{
+    ConfigOptions\TaskClass,
+    ConfigOptions\UsePackagedEnqueueTaskHandler,
+    TaskStatus
+};
 
 #[Service]
 readonly class EnqueueTaskHandler
@@ -21,6 +25,9 @@ readonly class EnqueueTaskHandler
         private string        $taskClass,
         private EntityManager $entityManager,
         private JsonEncoder   $jsonEncoder,
+
+        #[ConfigValue(UsePackagedEnqueueTaskHandler::class)]
+        private bool          $useThisHandler,
     )
     {
     }
@@ -28,6 +35,10 @@ readonly class EnqueueTaskHandler
     #[EventListener]
     public function handle(EnqueueTask $event): void
     {
+        if (!$this->useThisHandler) {
+            return;
+        }
+
         $task = $this->entityManager->create($this->taskClass, [
             'className' => $event->className,
             'methodName' => $event->methodName,
