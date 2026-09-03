@@ -68,6 +68,40 @@ readonly class TaskRunner
         }
     }
 
+    private function retryAllowed(Task $task): bool
+    {
+        if ($task->retryAfter === null) {
+            return false;
+        }
+
+        if ($task->maxAttempts !== null && $task->attempts >= $task->maxAttempts) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Processes queued tasks until the queue is empty, then returns - unlike run(),
+     * which loops for its configured lifetime and sleeps when idle. Failures are
+     * re-thrown rather than retried, so a synchronous caller (notably a test) sees
+     * them immediately. For draining the queue on demand, not the daemon path.
+     */
+    public function drain(): void
+    {
+        while (($task = $this->locker->lock()) !== null) {
+            try {
+                $this->execute($task);
+                $this->releaser->release($task, TaskStatus::Complete);
+            }
+            catch (\Throwable $e) {
+                $this->releaser->release($task, TaskStatus::Failed);
+
+                throw $e;
+            }
+        }
+    }
+
     private function execute(Task $task): void
     {
         $executor = $this->serviceManager->resolve($task->className);
@@ -90,18 +124,5 @@ readonly class TaskRunner
         $arguments = $this->objectInstantiator->resolveMethodParameters($method, $arguments);
 
         $executor->{$task->methodName}(...$arguments);
-    }
-
-    private function retryAllowed(Task $task): bool
-    {
-        if ($task->retryAfter === null) {
-            return false;
-        }
-
-        if ($task->maxAttempts !== null && $task->attempts >= $task->maxAttempts) {
-            return false;
-        }
-
-        return true;
     }
 }
