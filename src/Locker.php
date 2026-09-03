@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Medas\TaskRunner;
 
 use Medas\Core\{Attributes\ConfigValue, Attributes\Service, CodeGenerator};
-use Medas\EntityManager\Filters\LessThanOrEqual;
+use Medas\EntityManager\Filters\{AnyOf, IsNull, LessThanOrEqual};
 use Medas\EntityManager\Repository;
 use Medas\EntityManager\Selector\{Operants\Property, Selectors\WithValues, Slice, Sorting\SortBy};
 use Medas\StorageManager\{
@@ -72,7 +72,12 @@ readonly class Locker
         $conditions = [
             'lockMarker' => null,
             'status' => TaskStatus::Pending,
-            'scheduledAt' => new LessThanOrEqual('scheduledAt', $now),
+
+            // Due, or with no schedule at all - a null scheduledAt means "run ASAP".
+            'scheduledAt' => new AnyOf(
+                new LessThanOrEqual('scheduledAt', $now),
+                new IsNull('scheduledAt'),
+            ),
         ];
 
         $sorts = [SortBy::c(Property::c('createdAt'))];
