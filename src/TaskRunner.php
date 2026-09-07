@@ -8,15 +8,18 @@ use Medas\Core\{
     Attributes\ConfigValue,
     Attributes\Entrypoint,
     Attributes\Service,
+    Interfaces\EntityManager,
     Interfaces\ObjectInstantiator,
     Interfaces\ServiceManager
 };
+use Medas\EntityManager\Attributes\Entity;
 use Medas\Json\JsonEncoder;
 
 #[Service, Entrypoint]
 readonly class TaskRunner
 {
     public function __construct(
+        private EntityManager             $entityManager,
         private JsonEncoder               $jsonEncoder,
         private Locker                    $locker,
         private ObjectInstantiator        $objectInstantiator,
@@ -121,8 +124,41 @@ readonly class TaskRunner
         }
 
         $method = new \ReflectionMethod($task->className, $task->methodName);
+        $arguments = $this->hydrateEntities($method, $arguments);
         $arguments = $this->objectInstantiator->resolveMethodParameters($method, $arguments);
 
         $executor->{$task->methodName}(...$arguments);
+    }
+
+    /**
+     * @param array<string, mixed> $arguments
+     * @return array<string, mixed>
+     */
+    private function hydrateEntities(\ReflectionMethod $method, array $arguments): array
+    {
+        foreach ($method->getParameters() as $parameter) {
+            if (!array_key_exists($parameter->name, $arguments) || $arguments[$parameter->name] === null) {
+                continue;
+            }
+
+            $type = $parameter->getType();
+
+            if (!$type instanceof \ReflectionNamedType || $type->isBuiltin()) {
+                continue;
+            }
+
+            $class = $type->getName();
+
+            if (attribute(Entity::class, new \ReflectionClass($class)) === null) {
+                continue;
+            }
+
+            $arguments[$parameter->name] = $this->entityManager->get(
+                $class,
+                $arguments[$parameter->name]
+            );
+        }
+
+        return $arguments;
     }
 }
