@@ -50,6 +50,7 @@ readonly class TaskRunner
             else {
                 try {
                     $this->execute($task);
+                    $this->entityManager->flush();
                     $this->releaser->release($task, TaskStatus::Complete);
                 }
                 catch (\Throwable $e) {
@@ -95,6 +96,7 @@ readonly class TaskRunner
         while (($task = $this->locker->lock()) !== null) {
             try {
                 $this->execute($task);
+                $this->entityManager->flush();
                 $this->releaser->release($task, TaskStatus::Complete);
             }
             catch (\Throwable $e) {
