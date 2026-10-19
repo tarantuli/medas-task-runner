@@ -59,6 +59,8 @@ readonly class TaskRunner
                     }
                     else {
                         $this->releaser->release($task, TaskStatus::Failed);
+
+                        dispatch(new Events\TaskFailed($task, $e));
                     }
 
                     if ($this->exceptionHandler !== null) {
@@ -101,6 +103,8 @@ readonly class TaskRunner
             }
             catch (\Throwable $e) {
                 $this->releaser->release($task, TaskStatus::Failed);
+
+                dispatch(new Events\TaskFailed($task, $e));
 
                 throw $e;
             }
